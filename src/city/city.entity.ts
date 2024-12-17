@@ -5,9 +5,6 @@ export type CityDocument = HydratedDocument<City>;
 
 @Schema()
 export class City {
-  @Prop({ _id: true })
-  _id: mongoose.Types.ObjectId;
-
   @Prop({ required: true })
   name: string;
 

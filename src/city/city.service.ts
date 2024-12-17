@@ -17,12 +17,13 @@ export class CityService {
     return await this.cityModel.find({ postal_code }).exec();
   }
 
-  async registerCity(city: CreateCityDto): Promise<City> {
-    const cityRegistered = await this.findByPostalCode(city.postal_code);
+  async registerCity(cityDTO: CreateCityDto): Promise<City> {
+    const cityRegistered = await this.findByPostalCode(cityDTO.postal_code);
     if (cityRegistered && cityRegistered.length > 0) {
       throw new HttpException('City already registered', 400);
     }
-    const newCity = await this.cityModel.create(city);
+    const newCity = new this.cityModel(cityDTO);
+    console.log('🚀 ~ CityService ~ registerCity ~ newCity:', newCity);
     return await newCity.save();
   }
 }

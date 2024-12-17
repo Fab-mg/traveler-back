@@ -11,7 +11,7 @@ export class Vehicle {
   @Prop()
   model: number;
 
-  @Prop()
+  @Prop({ required: true })
   number: string;
 
   @Prop()

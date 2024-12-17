@@ -1,14 +1,17 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument, Mongoose } from 'mongoose';
 
 export type CityDocument = HydratedDocument<City>;
 
 @Schema()
 export class City {
-  @Prop()
+  @Prop({ _id: true })
+  _id: mongoose.Types.ObjectId;
+
+  @Prop({ required: true })
   name: string;
 
-  @Prop()
+  @Prop({ required: true })
   postal_code: number;
 
   @Prop()

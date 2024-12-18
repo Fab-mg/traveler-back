@@ -4,26 +4,56 @@ import { City } from './city.entity';
 import { Model } from 'mongoose';
 import { HttpException } from '@nestjs/common';
 import { CreateCityDto } from './DTO/create.city.dto';
+import { FindCityDTO } from './DTO/findCity.dto';
+import { getPagination } from 'src/helpers/classes/pagination.functions';
+import { PaginationClass } from 'src/helpers/classes/pagination.class.dto';
+import { PaginatedResult } from 'src/helpers/classes/paginatedResutls.class';
 
 @Injectable()
 export class CityService {
   constructor(@InjectModel(City.name) private cityModel: Model<City>) {}
 
-  async findAll(): Promise<City[]> {
-    return await this.cityModel.find().exec();
+  async findAll(
+    paginationDTO?: PaginationClass,
+  ): Promise<PaginatedResult<City>> {
+    const pagination = getPagination(
+      paginationDTO ? paginationDTO : new PaginationClass(),
+    );
+    const totalResults = await this.cityModel.countDocuments();
+    const maxPage = Math.ceil(totalResults / pagination.pageSize);
+    const results = await this.cityModel
+      .find()
+      .limit(pagination.pageSize)
+      .skip(pagination.pageSize * (pagination.pageNumber - 1))
+      .exec();
+    return new PaginatedResult(results, totalResults, maxPage);
   }
 
-  async findByPostalCode(postal_code: number): Promise<City[]> {
-    return await this.cityModel.find({ postal_code }).exec();
+  async findByQuery(findCityDTO?: FindCityDTO): Promise<PaginatedResult<City>> {
+    if (findCityDTO) {
+      const { pageNumber, pageSize, ...query } = findCityDTO;
+      const pagination = getPagination({ pageNumber, pageSize });
+      const totalResults = await this.cityModel.countDocuments(query);
+      const maxPage = Math.ceil(totalResults / pagination.pageSize);
+      const results = await this.cityModel
+        .find({ ...query })
+        .limit(pagination.pageSize)
+        .skip(pagination.pageSize * (pagination.pageNumber - 1))
+        .exec();
+      return new PaginatedResult(results, totalResults, maxPage);
+    } else {
+      throw new HttpException('Bad request: Empty Query', 400);
+    }
   }
 
   async registerCity(cityDTO: CreateCityDto): Promise<City> {
-    const cityRegistered = await this.findByPostalCode(cityDTO.postal_code);
-    if (cityRegistered && cityRegistered.length > 0) {
+    const cityRegistered = await this.findByQuery({
+      postal_code: Number(cityDTO.postal_code),
+    });
+    if (cityRegistered && cityRegistered.items.length > 0) {
       throw new HttpException('City already registered', 400);
     }
     const newCity = new this.cityModel(cityDTO);
-    console.log('🚀 ~ CityService ~ registerCity ~ newCity:', newCity);
     return await newCity.save();
   }
 }

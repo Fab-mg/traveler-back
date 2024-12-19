@@ -8,6 +8,8 @@ import { FindCityDTO } from './DTO/findCity.dto';
 import { getPagination } from 'src/helpers/classes/pagination.functions';
 import { PaginationClass } from 'src/helpers/classes/pagination.class.dto';
 import { PaginatedResult } from 'src/helpers/classes/paginatedResutls.class';
+import { convertStringToObjectId } from 'src/helpers/helper.functions';
+import { UpdateCityDto } from './DTO/update.city.dto';
 
 @Injectable()
 export class CityService {
@@ -55,5 +57,72 @@ export class CityService {
     }
     const newCity = new this.cityModel(cityDTO);
     return await newCity.save();
+  }
+
+  async getCityById(id: string): Promise<City> {
+    if (!id) {
+      throw new HttpException(
+        'Bad request: Empty ID in getCityById service',
+        400,
+      );
+    }
+    if (id.length != 24) {
+      throw new HttpException(
+        'Bad request: Invalid ID in getCityById service',
+        400,
+      );
+    }
+    const finalId = convertStringToObjectId(id);
+    return await this.cityModel.findById(finalId);
+  }
+
+  async updateCityById(
+    id: string,
+    updateCityDto: UpdateCityDto,
+  ): Promise<City> {
+    if (!id) {
+      throw new HttpException(
+        'Bad request: Empty ID in updateCityById service',
+        400,
+      );
+    }
+    if (id.length != 24) {
+      throw new HttpException(
+        'Bad request: Invalid ID in updateCityById service',
+        400,
+      );
+    }
+    const city = await this.getCityById(id);
+    if (!city) {
+      throw new HttpException('City not found', 404);
+    }
+    const finalId = convertStringToObjectId(id);
+    let updated = await this.cityModel
+      .findByIdAndUpdate(finalId, updateCityDto)
+      .exec();
+    console.log('🚀 ~ CityService ~ updateCityById ~ updated:', updated);
+    if (!updated) {
+      throw new HttpException('Update failed', 400);
+    }
+    return updated;
+  }
+
+  async deleteCityById(id: string): Promise<City> {
+    if (!id) {
+      throw new HttpException(
+        'Bad request: Empty ID in deleteCityById service',
+        400,
+      );
+    }
+    if (id.length != 24) {
+      throw new HttpException(
+        'Bad request: Invalid ID in deleteCityById service',
+        400,
+      );
+    }
+    const finalId = convertStringToObjectId(id);
+    const deleted = await this.cityModel.findByIdAndDelete(finalId).exec();
+    console.log('🚀 ~ CityService ~ deleteCityById ~ deleted:', deleted);
+    return deleted;
   }
 }

@@ -1,8 +1,9 @@
-import { Controller, HttpException } from '@nestjs/common';
+import { Controller, Delete, HttpException, Param, Put } from '@nestjs/common';
 import { CityService } from './city.service';
 import { Get, Query, Post, Body } from '@nestjs/common';
 import { CreateCityDto } from './DTO/create.city.dto';
 import { FindCityDTO } from './DTO/findCity.dto';
+import { UpdateCityDto } from './DTO/update.city.dto';
 
 @Controller('city')
 export class CityController {
@@ -35,5 +36,20 @@ export class CityController {
       pageSize,
       pageNumber,
     });
+  }
+
+  @Get('/:id')
+  getCityById(@Param('id') id: string) {
+    return this.cityService.getCityById(id);
+  }
+
+  @Put('/:id')
+  updateCity(@Param('id') id: string, @Body() updateCityDTO: UpdateCityDto) {
+    return this.cityService.updateCityById(id, updateCityDTO);
+  }
+
+  @Delete('/:id')
+  deleteCity(@Param('id') id: string) {
+    return this.cityService.deleteCityById(id);
   }
 }

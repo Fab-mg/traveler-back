@@ -104,7 +104,7 @@ export class CityService {
     if (!updated) {
       throw new HttpException('Update failed', 400);
     }
-    return updated;
+    return { ...updated, ...updateCityDto };
   }
 
   async deleteCityById(id: string): Promise<City> {
@@ -120,9 +120,18 @@ export class CityService {
         400,
       );
     }
+    const city = await this.getCityById(id);
+    if (!city) {
+      throw new HttpException(
+        'City not found, it may have already been deleted',
+        404,
+      );
+    }
     const finalId = convertStringToObjectId(id);
     const deleted = await this.cityModel.findByIdAndDelete(finalId).exec();
-    console.log('🚀 ~ CityService ~ deleteCityById ~ deleted:', deleted);
+    if (!deleted) {
+      throw new HttpException('Delete failed', 400);
+    }
     return deleted;
   }
 }

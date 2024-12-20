@@ -15,7 +15,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     // MongooseModule.forRoot('mongodb://127.0.0.1:27017/traveler'),
     MongooseModule.forRootAsync({
       useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('DB_URI'),
+        // uri: configService.get<string>('DB_URI'),
+        uri: configService.get<string>('ATLAS_URI'),
       }),
       inject: [ConfigService],
     }),

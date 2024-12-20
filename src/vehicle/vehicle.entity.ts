@@ -9,16 +9,22 @@ export class Vehicle {
   type: string;
 
   @Prop()
-  model: number;
+  model: string;
 
   @Prop({ required: true })
   number: string;
 
   @Prop()
-  max_capacity: string;
+  max_capacity: number;
 
   @Prop()
-  max_load: string;
+  max_load: number;
+
+  @Prop({ default: new Date() })
+  registered_at: Date;
+
+  @Prop()
+  deleted_at: Date;
 }
 
 export const VehicleSchema = SchemaFactory.createForClass(Vehicle);

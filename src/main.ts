@@ -9,7 +9,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('Traveler API')
     .setDescription(
-      'API Documentation for the traveler api: an app made to manage and plan travels',
+      'API Documentation for the traveler api: Traveler is an app designed to simplify your travel experience. Effortlessly manage and organize every aspect of your journeys, from itineraries to packing lists, all in one place.',
     )
     .setVersion('1.0')
     .build();

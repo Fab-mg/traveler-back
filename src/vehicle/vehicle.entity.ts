@@ -23,8 +23,11 @@ export class Vehicle {
   @Prop({ default: new Date() })
   registered_at: Date;
 
-  @Prop()
-  deleted_at: Date;
+  @Prop({ nullable: true })
+  reactivated_at?: Date;
+
+  @Prop({ nullable: true })
+  deleted_at?: Date;
 }
 
 export const VehicleSchema = SchemaFactory.createForClass(Vehicle);

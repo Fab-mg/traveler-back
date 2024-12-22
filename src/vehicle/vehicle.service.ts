@@ -32,6 +32,38 @@ export class VehicleService {
     return new PaginatedResult(results, totalResults, maxPage);
   }
 
+  async findAllDeleted(
+    paginationDTO?: PaginationClass,
+  ): Promise<PaginatedResult<Vehicle>> {
+    const pagination = getPagination(
+      paginationDTO ? paginationDTO : new PaginationClass(),
+    );
+    const totalResults = await this.vehicleModel.countDocuments();
+    const maxPage = Math.ceil(totalResults / pagination.pageSize);
+    const results = await this.vehicleModel
+      .find({ deleted_at: { $ne: null } })
+      .limit(pagination.pageSize)
+      .skip(pagination.pageSize * (pagination.pageNumber - 1))
+      .exec();
+    return new PaginatedResult(results, totalResults, maxPage);
+  }
+
+  async findAllNonDeleted(
+    paginationDTO?: PaginationClass,
+  ): Promise<PaginatedResult<Vehicle>> {
+    const pagination = getPagination(
+      paginationDTO ? paginationDTO : new PaginationClass(),
+    );
+    const totalResults = await this.vehicleModel.countDocuments();
+    const maxPage = Math.ceil(totalResults / pagination.pageSize);
+    const results = await this.vehicleModel
+      .find({ deleted_at: null })
+      .limit(pagination.pageSize)
+      .skip(pagination.pageSize * (pagination.pageNumber - 1))
+      .exec();
+    return new PaginatedResult(results, totalResults, maxPage);
+  }
+
   async findByQuery(
     findVehicleDTO?: FindVehicleDTO,
   ): Promise<PaginatedResult<Vehicle>> {
@@ -51,11 +83,36 @@ export class VehicleService {
     }
   }
 
+  async findByQueryNonDeleted(
+    findVehicleDTO?: FindVehicleDTO,
+  ): Promise<PaginatedResult<Vehicle>> {
+    if (findVehicleDTO) {
+      const { pageNumber, pageSize, ...query } = findVehicleDTO;
+      const pagination = getPagination({ pageNumber, pageSize });
+      const totalResults = await this.vehicleModel.countDocuments(query);
+      const maxPage = Math.ceil(totalResults / pagination.pageSize);
+      const results = await this.vehicleModel
+        .find({ ...query, deleted_at: null })
+        .limit(pagination.pageSize)
+        .skip(pagination.pageSize * (pagination.pageNumber - 1))
+        .exec();
+      return new PaginatedResult(results, totalResults, maxPage);
+    } else {
+      throw new HttpException('Bad request: Empty Query', 400);
+    }
+  }
+
   async registerVehicle(createVehicleDTO: CreateVehicleDto): Promise<Vehicle> {
     const vehicleRegistered = await this.findByQuery({
       number: createVehicleDTO.number,
     });
     if (vehicleRegistered && vehicleRegistered.items.length > 0) {
+      if (!vehicleRegistered.items[0].deleted_at) {
+        throw new HttpException(
+          'Vehicle already registered, but it has been deactivated',
+          400,
+        );
+      }
       throw new HttpException('Vehicle already registered', 400);
     }
     const newVehicle = new this.vehicleModel(createVehicleDTO);
@@ -96,7 +153,7 @@ export class VehicleService {
       );
     }
     const vehicle = await this.getVehicleById(id);
-    if (!vehicle) {
+    if (!vehicle || vehicle.deleted_at) {
       throw new HttpException('Vehicle not found', 404);
     }
     const finalId = convertStringToObjectId(id);
@@ -111,6 +168,70 @@ export class VehicleService {
   }
 
   async deleteVehicleById(id: string): Promise<Vehicle> {
+    if (!id) {
+      throw new HttpException(
+        'Bad request: Empty ID in deleteVehicleById service',
+        400,
+      );
+    }
+    if (id.length != 24) {
+      throw new HttpException(
+        'Bad request: Invalid ID in deleteVehicleById service',
+        400,
+      );
+    }
+    const vehicle = await this.getVehicleById(id);
+    if (!vehicle || vehicle.deleted_at) {
+      throw new HttpException(
+        'Vehicle not found, it may have already been deleted',
+        404,
+      );
+    }
+    const finalId = convertStringToObjectId(id);
+    let updated = await this.vehicleModel
+      .findByIdAndUpdate(finalId, { deleted_at: new Date() })
+      .exec();
+    console.log('🚀 ~ VehicleService ~ updateVehicleById ~ updated:', updated);
+    if (!updated) {
+      throw new HttpException('Update failed', 400);
+    }
+    return { ...updated, deleted_at: new Date() };
+  }
+
+  async reactivateVehicleById(id: string): Promise<Vehicle> {
+    if (!id) {
+      throw new HttpException(
+        'Bad request: Empty ID in reactivate vehicle service',
+        400,
+      );
+    }
+    if (id.length != 24) {
+      throw new HttpException(
+        'Bad request: Invalid ID in reactivate vehicle service',
+        400,
+      );
+    }
+    const vehicle = await this.getVehicleById(id);
+    if (!vehicle) {
+      throw new HttpException('Vehicle not found', 404);
+    }
+    if (!vehicle.deleted_at) {
+      throw new HttpException('Vehicle is Already activated', 400);
+    }
+    const finalId = convertStringToObjectId(id);
+    let updated = await this.vehicleModel
+      .findByIdAndUpdate(finalId, {
+        $unset: { deleted_at: 1 },
+        reactivated_at: new Date(),
+      })
+      .exec();
+    if (!updated) {
+      throw new HttpException('REACTIVATION failed', 400);
+    }
+    return { ...updated, reactivated_at: new Date() };
+  }
+
+  async trueDeleteVehicleById(id: string): Promise<Vehicle> {
     if (!id) {
       throw new HttpException(
         'Bad request: Empty ID in deleteVehicleById service',

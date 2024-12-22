@@ -13,7 +13,7 @@ import { VehicleService } from './vehicle.service';
 import { CreateVehicleDto } from './DTO/create.vehicle.dto';
 import { FindVehicleDTO } from './DTO/findVehicle.dto';
 import { UpdateVehicleDto } from './DTO/update.vehicle.dto copy';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery } from '@nestjs/swagger';
 
 @Controller('vehicle')
 export class VehicleController {
@@ -22,6 +22,8 @@ export class VehicleController {
   @ApiOperation({
     summary: 'Get all vehicles, including the deleted (deactivated) ones.',
   })
+  @ApiQuery({ name: 'pageSize', required: false })
+  @ApiQuery({ name: 'pageNumber', required: false })
   @Get('/')
   getAllVehicles(
     @Query('pageSize') pageSize?: number,
@@ -34,6 +36,8 @@ export class VehicleController {
     summary:
       'Get all deleted vehicles: only the deactivated vehicles will be returned.',
   })
+  @ApiQuery({ name: 'pageSize', required: false })
+  @ApiQuery({ name: 'pageNumber', required: false })
   @Get('deleted/')
   getAllDeletedVehicles(
     @Query('pageSize') pageSize?: number,
@@ -46,6 +50,8 @@ export class VehicleController {
     summary:
       'Get all non-deleted vehicles, Only the activated vehicles will be shown.',
   })
+  @ApiQuery({ name: 'pageSize', required: false })
+  @ApiQuery({ name: 'pageNumber', required: false })
   @Get('non-deleted/')
   getAllNonDeletedVehicles(
     @Query('pageSize') pageSize?: number,
@@ -70,6 +76,8 @@ export class VehicleController {
     summary:
       'Find a vehicle from all the vehicles. (Includes the deactivated vehicles).',
   })
+  @ApiQuery({ name: 'pageSize', required: false })
+  @ApiQuery({ name: 'pageNumber', required: false })
   @Post('/find')
   findVehicle(
     @Body() findVehicleDTO: FindVehicleDTO,
@@ -87,6 +95,8 @@ export class VehicleController {
     summary:
       'Find a vehicle from all active the vehicles. (Does not includes the deactivated vehicles).',
   })
+  @ApiQuery({ name: 'pageSize', required: false })
+  @ApiQuery({ name: 'pageNumber', required: false })
   @Post('/find-non-deleted')
   findVehicleNonDeleted(
     @Body() findVehicleDTO: FindVehicleDTO,

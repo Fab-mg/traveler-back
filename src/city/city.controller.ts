@@ -4,7 +4,7 @@ import { Get, Query, Post, Body } from '@nestjs/common';
 import { CreateCityDto } from './DTO/create.city.dto';
 import { FindCityDTO } from './DTO/findCity.dto';
 import { UpdateCityDto } from './DTO/update.city.dto';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery } from '@nestjs/swagger';
 
 @Controller('city')
 export class CityController {
@@ -13,6 +13,8 @@ export class CityController {
   @ApiOperation({
     summary: 'Get all cities.',
   })
+  @ApiQuery({ name: 'pageSize', required: false })
+  @ApiQuery({ name: 'pageNumber', required: false })
   @Get('/')
   getAllCity(
     @Query('pageSize') pageSize?: number,
@@ -36,6 +38,8 @@ export class CityController {
   @ApiOperation({
     summary: 'Find city by body query.',
   })
+  @ApiQuery({ name: 'pageSize', required: false })
+  @ApiQuery({ name: 'pageNumber', required: false })
   @Post('/find')
   findCity(
     @Body() findCityDTO: FindCityDTO,

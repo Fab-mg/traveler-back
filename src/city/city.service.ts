@@ -127,6 +127,7 @@ export class CityService {
         404,
       );
     }
+    // TODO: ADD CITY USAGE VERIFICATION HERE
     const finalId = convertStringToObjectId(id);
     const deleted = await this.cityModel.findByIdAndDelete(finalId).exec();
     if (!deleted) {

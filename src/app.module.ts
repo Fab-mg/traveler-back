@@ -6,6 +6,7 @@ import { VehicleModule } from './vehicle/vehicle.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TravelModule } from './travel/travel.module';
+import { PlaceModule } from './place/place.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { TravelModule } from './travel/travel.module';
     CityModule,
     VehicleModule,
     TravelModule,
+    PlaceModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -19,7 +19,7 @@ export class Place {
 
   @Prop({
     type: mongoose.Types.ObjectId,
-    ref: Travel,
+    ref: () => Travel,
   })
   travel?: Travel[];
 }

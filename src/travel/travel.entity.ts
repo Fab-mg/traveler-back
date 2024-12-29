@@ -10,13 +10,13 @@ export type TravelDocument = HydratedDocument<Travel>;
 export class Travel {
   @Prop({
     type: mongoose.Types.ObjectId,
-    ref: City,
+    ref: () => City,
   })
   departCity: City;
 
   @Prop({
     type: mongoose.Types.ObjectId,
-    ref: City,
+    ref: () => City,
   })
   arrivalCity: City;
 
@@ -24,7 +24,7 @@ export class Travel {
     type: [
       {
         type: mongoose.Types.ObjectId,
-        ref: Place,
+        ref: () => Place,
       },
     ],
   })

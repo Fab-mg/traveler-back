@@ -45,11 +45,6 @@ export class TravelService {
         newTravel,
         createTravelDTO.basePlacePrice,
       );
-      console.log('We got here');
-      console.log(
-        '🚀 ~ TravelService ~ createTravel ~ travelPlaces:',
-        travelPlaces,
-      );
       newTravel.places = travelPlaces;
       return await newTravel.save();
     } catch (error) {

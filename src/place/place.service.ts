@@ -36,22 +36,43 @@ export class PlaceService {
       }
       if (travel.placeNumbers && travel.placeNumbers >= 0) {
         const places = [];
+        const placesDocuments = [];
         for (let i = 0; i < travel.placeNumbers; i++) {
           const newPlace = new this.placeModel({
             placeNumber: i + 1,
             placeState: PlaceState.FREE,
             placePrice,
           });
+          const newPlaceDoc = new this.placeModel({
+            _id: newPlace._id,
+            placeNumber: i + 1,
+            placeState: PlaceState.FREE,
+            placePrice,
+          });
+          placesDocuments.push(newPlaceDoc);
+          // create 2 documents for each place, return the travel-less documents to avoid cirular json in mongo
           newPlace.travel = travel;
           places.push(newPlace);
         }
         await this.placeModel.insertMany(places);
-        return places;
+        return placesDocuments;
       } else {
         throw new Error('Travel place number should not be a negative number');
       }
     } catch (error) {
       throw new Error(error.message + ' : failed to create travel places');
+    }
+  }
+
+  async removeTravelFromPlaces(placesDocuments: Place[]) {
+    try {
+      const places = placesDocuments.map((place) => {
+        const { travel, ...newPlace } = place;
+        return newPlace;
+      });
+      return places;
+    } catch (error) {
+      throw new Error(error.message + ' : failed to remove travel from places');
     }
   }
 

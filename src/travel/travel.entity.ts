@@ -21,6 +21,18 @@ export class Travel {
   arrivalCity: City;
 
   @Prop()
+  startDate: Date;
+
+  @Prop({ nullable: true })
+  plannedEndDate?: Date;
+
+  @Prop()
+  endDate: Date;
+
+  @Prop({ nullable: true })
+  description?: string;
+
+  @Prop()
   placeNumbers: number;
 
   @Prop({

@@ -10,5 +10,6 @@ import { City, CitySchema } from './city.entity';
   ],
   providers: [CityService],
   controllers: [CityController],
+  exports: [CityService],
 })
 export class CityModule {}

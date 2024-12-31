@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Place } from './place.entity';
 import { Travel } from 'src/travel/travel.entity';
+import { PlaceState } from 'src/config/constants';
 
 @Injectable()
 export class PlaceService {
@@ -25,7 +26,10 @@ export class PlaceService {
     return await newPlace.save();
   }
 
-  async generatePlacesForTravel(travel: Travel) {
+  async generatePlacesForTravel(
+    travel: Travel,
+    placePrice: number,
+  ): Promise<Place[]> {
     try {
       if (!travel) {
         throw new Error('Travel must be provided in create places');
@@ -33,7 +37,11 @@ export class PlaceService {
       if (travel.placeNumbers && travel.placeNumbers >= 0) {
         const places = [];
         for (let i = 0; i < travel.placeNumbers; i++) {
-          const newPlace = new this.placeModel();
+          const newPlace = new this.placeModel({
+            placeNumber: i + 1,
+            placeState: PlaceState.FREE,
+            placePrice,
+          });
           newPlace.travel = travel;
           places.push(newPlace);
         }

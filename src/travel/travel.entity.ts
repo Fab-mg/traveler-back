@@ -20,6 +20,9 @@ export class Travel {
   })
   arrivalCity: City;
 
+  @Prop()
+  placeNumbers: number;
+
   @Prop({
     type: [
       {

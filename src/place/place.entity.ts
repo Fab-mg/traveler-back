@@ -21,7 +21,7 @@ export class Place {
     type: mongoose.Types.ObjectId,
     ref: () => Travel,
   })
-  travel?: Travel[];
+  travel: Travel;
 }
 
 export const PlaceSchema = SchemaFactory.createForClass(Place);

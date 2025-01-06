@@ -1,6 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import * as mongoose from 'mongoose';
+import { Role } from 'src/config/constants';
+import { UserMetadata } from 'src/user-metadata/user-metadata.entity';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -21,20 +23,17 @@ export class User {
   @Prop({ required: true })
   password: string;
 
-  @Prop({ required: true })
-  name: string;
+  @Prop({ required: true, default: Role.TRAVELLER })
+  role: string;
 
-  @Prop({ required: true })
-  postal_code: number;
-
-  @Prop()
-  region: string;
-
-  @Prop()
-  country: string;
-
-  @Prop()
-  continent: string;
+  @Prop({
+    nullable: true,
+    type: {
+      type: mongoose.Types.ObjectId,
+      ref: () => UserMetadata,
+    },
+  })
+  user_metadata?: UserMetadata;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

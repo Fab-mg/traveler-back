@@ -9,6 +9,7 @@ import { TravelModule } from './travel/travel.module';
 import { PlaceModule } from './place/place.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
+import { UserMetadataModule } from './user-metadata/user-metadata.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { UserModule } from './user/user.module';
     PlaceModule,
     AuthModule,
     UserModule,
+    UserMetadataModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -18,5 +18,7 @@ express-oauth2-jwt-bearer require the previously mentioned versions of node. If 
 - ping -6 registry.npmjs.org (if ok: ipv6 is ok, if not, run the commands bellow)
 - npm config list (to check if you have proxy on)
 - npm config delete proxy
-  If the issue persists :
+
+## If the issue persists :
+
 - npm set strict-ssl=false

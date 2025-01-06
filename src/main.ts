@@ -25,9 +25,9 @@ async function bootstrap() {
   const auth0Issuer = configService.get<string>('AUTH0_ISSUER');
   const auth0Alg = configService.get<string>('AUTH0_ALG');
   const jwtCheck = auth({
-    audience: 'traveler-local',
-    issuerBaseURL: 'https://traveler-fab.eu.auth0.com/',
-    tokenSigningAlg: 'RS256',
+    audience: auth0Audience,
+    issuerBaseURL: auth0Issuer,
+    tokenSigningAlg: auth0Alg,
   });
   app.use(jwtCheck);
   await app.listen(port || 3000);

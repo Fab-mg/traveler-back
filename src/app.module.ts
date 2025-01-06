@@ -7,7 +7,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TravelModule } from './travel/travel.module';
 import { PlaceModule } from './place/place.module';
-import { AuthzModule } from './authz/authz.module';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -27,7 +28,8 @@ import { AuthzModule } from './authz/authz.module';
     VehicleModule,
     TravelModule,
     PlaceModule,
-    AuthzModule,
+    AuthModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],

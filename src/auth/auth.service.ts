@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { Reflector } from '@nestjs/core';
 
 @Injectable()
 export class AuthService {
@@ -14,7 +13,6 @@ export class AuthService {
   constructor(
     private jwtService: JwtService,
     private configService: ConfigService,
-    private reflector: Reflector,
   ) {
     this.alg = this.configService.get<string>('AUTH0_ALG');
     this.audience = this.configService.get<string>('AUTH0_AUDIENCE');

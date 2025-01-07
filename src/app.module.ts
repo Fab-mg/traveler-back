@@ -14,8 +14,8 @@ import { UserMetadataModule } from './user-metadata/user-metadata.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: '.dev.env',
       isGlobal: true,
+      envFilePath: '.dev.env',
     }),
     // MongooseModule.forRoot('mongodb://127.0.0.1:27017/traveler'),
     MongooseModule.forRootAsync({

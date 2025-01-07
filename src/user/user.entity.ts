@@ -14,8 +14,11 @@ export class User {
   })
   _id: mongoose.Types.ObjectId;
 
-  @Prop()
+  @Prop({ required: true })
   auth0_id: string;
+
+  @Prop()
+  name: string;
 
   @Prop({ required: true })
   email: string;
@@ -27,7 +30,6 @@ export class User {
   role: string;
 
   @Prop({
-    nullable: true,
     type: {
       type: mongoose.Types.ObjectId,
       ref: () => UserMetadata,

@@ -12,9 +12,6 @@ export class Gender {
 
 export class Role {
   static ADMIN = 'ADMIN';
-  static USER = 'USER';
-  static OWNER = 'OWNER';
   static TRAVELLER = 'TRAVELLER';
   static MODERATOR = 'MODERATOR';
-  static GUEST = 'GUEST';
 }

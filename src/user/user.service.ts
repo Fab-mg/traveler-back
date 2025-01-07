@@ -64,6 +64,11 @@ export class UserService {
     return user;
   }
 
+  // TODO: implement this method
+  async registerAuth0UserToDb(): Promise<User> {
+    return new this.UserModel();
+  }
+
   async getMachineToken(): Promise<string> {
     try {
       const response = await axios.post(this.authMachineUrl, {

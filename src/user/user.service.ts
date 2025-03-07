@@ -40,31 +40,31 @@ export class UserService {
   // we will add a register via AUth0 and also backend
   // To differentiate between the two, we will add a field called registeredViaBackend BOOLEAN
 
-  async register(registerUserDTO: RegisterUserDTO): Promise<User> {
-    if (await this.findByEmail(registerUserDTO.email)) {
-      throw new HttpException('Email already exists', 409);
-    }
-    const user = new this.UserModel(registerUserDTO);
-    const auth0User = await this.createAuth0User(
-      registerUserDTO.email,
-      registerUserDTO.password,
-      registerUserDTO.username,
-    );
-    if (!auth0User) {
-      throw new HttpException('Failed to create Auth0 user', 500);
-    }
-    user.auth0_id = auth0User.user_id;
-    var salt = bcrypt.genSaltSync(10);
-    console.log('🚀 ~ UserService ~ register ~ salt:', salt);
-    var hashedPassword = bcrypt.hashSync(registerUserDTO.password, salt);
-    console.log(
-      '🚀 ~ UserService ~ register ~ hashedPassword:',
-      hashedPassword,
-    );
-    user.password = hashedPassword;
-    await user.save();
-    return user;
-  }
+  // async register(registerUserDTO: RegisterUserDTO): Promise<User> {
+  //   if (await this.findByEmail(registerUserDTO.email)) {
+  //     throw new HttpException('Email already exists', 409);
+  //   }
+  //   const user = new this.UserModel(registerUserDTO);
+  //   const auth0User = await this.createAuth0User(
+  //     registerUserDTO.email,
+  //     registerUserDTO.password,
+  //     registerUserDTO.username,
+  //   );
+  //   if (!auth0User) {
+  //     throw new HttpException('Failed to create Auth0 user', 500);
+  //   }
+  //   user.auth0_id = auth0User.user_id;
+  //   var salt = bcrypt.genSaltSync(10);
+  //   console.log('🚀 ~ UserService ~ register ~ salt:', salt);
+  //   var hashedPassword = bcrypt.hashSync(registerUserDTO.password, salt);
+  //   console.log(
+  //     '🚀 ~ UserService ~ register ~ hashedPassword:',
+  //     hashedPassword,
+  //   );
+  //   user.password = hashedPassword;
+  //   await user.save();
+  //   return user;
+  // }
 
   async registerUserViaBackend(
     registerUserDTO: RegisterUserDTO,
@@ -74,19 +74,48 @@ export class UserService {
       if (duplicateUser && duplicateUser.registeredViaBackend) {
         throw new HttpException('Email already exists', 409);
       }
+      const salt = bcrypt.genSaltSync(this.saltRound);
+      const hashedPassword = bcrypt.hashSync(registerUserDTO.password, salt);
       const user = new this.UserModel({
         ...registerUserDTO,
+        password: hashedPassword,
         registeredViaBackend: true,
         isEmailVerified: false,
       });
       await user.save();
+      const cleanedUser = {
+        email: user.email,
+        username: user.username,
+      };
+      await this.saveDbUserToAuth0(cleanedUser);
       return user;
     } catch (error) {
       throw new HttpException(`failed to register user : ${error}`, 500);
     }
   }
 
-  async registerAuth0UserToDb(registerUserDTO: RegisterUserDTO): Promise<User> {
+  async saveDbUserToAuth0(registerUserDTO: RegisterUserDTO) {
+    const accessToken = await this.getMachineToken();
+    const response = await axios.post(
+      `${this.audience}users`,
+      {
+        email: registerUserDTO.email,
+        // password: registerUserDTO.password,
+        username: registerUserDTO.username,
+        connection: 'Username-Password-Authentication',
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+    console.log(response);
+    return response.data;
+  }
+
+  async saveAuth0UserToDb(registerUserDTO: RegisterUserDTO): Promise<User> {
     try {
       const user = new this.UserModel({
         registerUserDTO,
@@ -120,14 +149,18 @@ export class UserService {
     }
   }
 
-  async createAuth0User(email: string, password: string, username: string) {
+  async registerAuth0User(
+    email: string,
+    password: string,
+    username: string,
+  ): Promise<User> {
     try {
       const accessToken = await this.getMachineToken();
       const response = await axios.post(
         `${this.audience}users`,
         {
           email,
-          password,
+          // password,
           username,
           connection: 'Username-Password-Authentication',
         },
@@ -138,12 +171,12 @@ export class UserService {
           },
         },
       );
-      const dbUser = await this.registerAuth0UserToDb({
+      const dbUser = await this.saveAuth0UserToDb({
         email,
         password,
         username,
       });
-      return response.data;
+      return dbUser;
     } catch (error) {
       console.log(error);
       throw new HttpException(`failed to create auth0 user : ${error}`, 500);

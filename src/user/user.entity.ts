@@ -18,7 +18,7 @@ export class User {
   auth0_id: string;
 
   @Prop()
-  name: string;
+  username: string;
 
   @Prop({ required: true })
   email: string;
@@ -36,6 +36,12 @@ export class User {
     },
   })
   user_metadata?: UserMetadata;
+
+  @Prop({ default: false })
+  registeredViaBackend: boolean;
+
+  @Prop({ default: true })
+  isEmailVerified: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

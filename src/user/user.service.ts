@@ -37,7 +37,9 @@ export class UserService {
     return await this.UserModel.findOne({ email }).exec();
   }
 
-  // register using server and login with auth0
+  // we will add a register via AUth0 and also backend
+  // To differentiate between the two, we will add a field called registeredViaBackend BOOLEAN
+
   async register(registerUserDTO: RegisterUserDTO): Promise<User> {
     if (await this.findByEmail(registerUserDTO.email)) {
       throw new HttpException('Email already exists', 409);
@@ -46,7 +48,7 @@ export class UserService {
     const auth0User = await this.createAuth0User(
       registerUserDTO.email,
       registerUserDTO.password,
-      registerUserDTO.name,
+      registerUserDTO.username,
     );
     if (!auth0User) {
       throw new HttpException('Failed to create Auth0 user', 500);
@@ -64,9 +66,41 @@ export class UserService {
     return user;
   }
 
-  // TODO: implement this method
-  async registerAuth0UserToDb(): Promise<User> {
-    return new this.UserModel();
+  async registerUserViaBackend(
+    registerUserDTO: RegisterUserDTO,
+  ): Promise<User> {
+    try {
+      const duplicateUser = await this.findByEmail(registerUserDTO.email);
+      if (duplicateUser && duplicateUser.registeredViaBackend) {
+        throw new HttpException('Email already exists', 409);
+      }
+      const user = new this.UserModel({
+        ...registerUserDTO,
+        registeredViaBackend: true,
+        isEmailVerified: false,
+      });
+      await user.save();
+      return user;
+    } catch (error) {
+      throw new HttpException(`failed to register user : ${error}`, 500);
+    }
+  }
+
+  async registerAuth0UserToDb(registerUserDTO: RegisterUserDTO): Promise<User> {
+    try {
+      const user = new this.UserModel({
+        registerUserDTO,
+        registeredViaBackend: false,
+        isEmailVerified: true,
+      });
+      await user.save();
+      return user;
+    } catch (error) {
+      throw new HttpException(
+        `failed to register user to database: ${error}`,
+        500,
+      );
+    }
   }
 
   async getMachineToken(): Promise<string> {
@@ -86,7 +120,7 @@ export class UserService {
     }
   }
 
-  async createAuth0User(email: string, password: string, name: string) {
+  async createAuth0User(email: string, password: string, username: string) {
     try {
       const accessToken = await this.getMachineToken();
       const response = await axios.post(
@@ -94,7 +128,7 @@ export class UserService {
         {
           email,
           password,
-          name,
+          username,
           connection: 'Username-Password-Authentication',
         },
         {
@@ -104,10 +138,19 @@ export class UserService {
           },
         },
       );
+      const dbUser = await this.registerAuth0UserToDb({
+        email,
+        password,
+        username,
+      });
       return response.data;
     } catch (error) {
       console.log(error);
       throw new HttpException(`failed to create auth0 user : ${error}`, 500);
     }
+  }
+
+  async getUserFromAuthId(auth0_id: string): Promise<User> {
+    return await this.UserModel.findOne({ auth0_id }).exec();
   }
 }

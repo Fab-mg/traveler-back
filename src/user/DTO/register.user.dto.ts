@@ -25,5 +25,5 @@ export class RegisterUserDTO {
   })
   @IsString()
   @IsNotEmpty()
-  readonly name: string;
+  readonly username: string;
 }
